@@ -1,21 +1,24 @@
-# Настройка репликации
+# Настройка шардирования MongoDB
+
+## Шаги для инициализации шардирования
 
 1. **Запуск docker-compose**:
    ```bash
    docker-compose up -d
 
-2. **Подключение к конфигурационному серверу**:
+2. **Подключение к mongos**:
 
    ```bash
-   docker exec -it configSrv mongosh --port 27017
+   docker exec -it mongos_router mongosh
 
 3. **Инициализация конфигурационного сервера**:
 
    ```bash
    rs.initiate({
-      _id: "config_replica_set",
+      _id: "config_server",
       members: [{_id: 0, host: "configSrv:27017"}],
-      configsvr: true
+      configsvr: true,
+      version: 1
     });
 
 4. **Подключение к шарду 1**:
@@ -34,7 +37,7 @@
    docker exec -it shard2 mongosh --port 27019
 
 7. **Инициализация шарда 2**:
-   
+
    ```bash
    rs.initiate({_id: "shard2", members: [{_id: 0, host: "shard2:27019"}], version: 1});
 
@@ -59,9 +62,3 @@
 
    ```bash
    sh.status();
-
-12. **Подключение к redis и создание кластера**:
-   
-   ```bash
-   docker exec -it redis_1 
-   echo "yes" | redis-cli --cluster create   173.17.0.2:6379   173.17.0.3:6379   173.17.0.4:6379   173.17.0.5:6379   173.17.0.6:6379   173.17.0.7:6379   --cluster-replicas 1
