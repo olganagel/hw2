@@ -1,4 +1,4 @@
-# Настройка репликации
+# I. Практика
 
 1. **Запуск docker-compose**:
    ```bash
@@ -65,3 +65,7 @@
    ```bash
    docker exec -it redis_1 
    echo "yes" | redis-cli --cluster create   173.17.0.2:6379   173.17.0.3:6379   173.17.0.4:6379   173.17.0.5:6379   173.17.0.6:6379   173.17.0.7:6379   --cluster-replicas 1
+
+
+# II. Схема
+https://drive.google.com/file/d/1ELOKZpuVxH4WKBUKmHo3X6D05SSijMmd/view?usp=sharing
