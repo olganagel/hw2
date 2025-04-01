@@ -1,35 +1,25 @@
-# pymongo-api
+# I. Практика
 
-## Как запустить
+## pymongo-api
 
-Запускаем mongodb и приложение
+1. **Запуск docker-compose**:
+   ```bash
+   docker-compose up -d
 
-```shell
-docker compose up -d
-```
+2. **Подключение к БД**:
 
-Заполняем mongodb данными
+   ```bash
+   docker exec -T mongodb mongosh
 
-```shell
-./scripts/mongo-init.sh
-```
+3. **Инициализация БД**:
 
-## Как проверить
+   ```bash
+   use somedb;
+   for(var i = 0; i < 1000; i++) db.helloDoc.insertOne({age:i, name:"ly"+i})
+    
+4. **Открыть в браузере**:
 
-### Если вы запускаете проект на локальной машине
+http://localhost:8080/helloDoc/users
 
-Откройте в браузере http://localhost:8080
-
-### Если вы запускаете проект на предоставленной виртуальной машине
-
-Узнать белый ip виртуальной машины
-
-```shell
-curl --silent http://ifconfig.me
-```
-
-Откройте в браузере http://<ip виртуальной машины>:8080
-
-## Доступные эндпоинты
-
-Список доступных эндпоинтов, swagger http://<ip виртуальной машины>:8080/docs
+# II. Схема
+https://drive.google.com/file/d/1ELOKZpuVxH4WKBUKmHo3X6D05SSijMmd/view?usp=sharing
