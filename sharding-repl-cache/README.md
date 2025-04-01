@@ -1,8 +1,8 @@
-# Настройка репликации
+# Настройка кеширования
 
 1. **Запуск docker-compose**:
    ```bash
-   docker-compose up -d
+   docker-compose compose up -d
 
 2. **Подключение к конфигурационному серверу**:
 
@@ -13,55 +13,77 @@
 
    ```bash
    rs.initiate({
-      _id: "config_replica_set",
+      _id: "config_server",
       members: [{_id: 0, host: "configSrv:27017"}],
       configsvr: true
     });
 
-4. **Подключение к шарду 1**:
+--
+5. **Подключение к шарду 1**:
+
+   ```bash
+   docker exec -it shard1_1 mongosh --port 27018
+
+6. **Инициализация шарда 1**:
+
+   ```bash
+   rs.initiate(
+    {
+      _id : "shard1",
+      members: [
+        { _id : 0, host : "173.17.0.9:27018" },
+        { _id : 1, host : "173.17.0.8:27019" },
+        { _id : 2, host : "173.17.0.5:27021" }
+      ]
+    }
+  );
+  exit();
+
+7. **Подключение к шарду 2**:
+
+   ```bash
+   docker exec -it shard2_1 mongosh --port 27022
    
-   ```bash
-   docker exec -it shard1 mongosh --port 27018
 
-5. **Инициализация шарда 1**:
+8. **Инициализация шарда 2**:
 
    ```bash
-   rs.initiate({_id: "shard1", members: [{_id: 0, host: "shard1:27018"}], version: 1});
+   rs.initiate(
+    {
+      _id : "shard2",
+      members: [
+        { _id : 0, host : "173.17.0.4:27022" },
+        { _id : 1, host : "173.17.0.3:27023" },
+        { _id : 2, host : "173.17.0.2:27024" }
+      ]
+    }
+  );
+  exit();
 
-6. **Подключение к шарду 2**:
-   
-   ```bash
-   docker exec -it shard2 mongosh --port 27019
-
-7. **Инициализация шарда 2**:
-   
-   ```bash
-   rs.initiate({_id: "shard2", members: [{_id: 0, host: "shard2:27019"}], version: 1});
-
-8. **Подключение к роутеру**:
+9. **Подключение к mongos_router**:
 
    ```bash
    docker exec -it mongos_router mongosh --port 27020
 
-9.  **Добавление шардов в кластер**:
+10.  **Добавление шардов в кластер**:
 
    ```bash
-   sh.addShard("shard1/shard1:27018");
-   sh.addShard("shard2/shard2:27019");
+   sh.addShard("shard1/173.17.0.9:27018,173.17.0.8:27019,173.17.0.5:27021");
+   sh.addShard("shard2/173.17.0.4:27022,173.17.0.3:27023,173.17.0.2:27024");
 
-10. **Включение шардирования БД**:
+11. **Включение шардирования БД**:
 
    ```bash
    sh.enableSharding("somedb");
    sh.shardCollection("somedb.helloDoc", {"_id": "hashed"});
 
-11. **Проверка статуса шардирования**:
+12. **Проверка результата**:
 
    ```bash
-   sh.status();
+   use somedb;
+   for(var i = 0; i < 1000; i++) db.helloDoc.insert({age:i, name:"ly"+i});
+   db.helloDoc.countDocuments() 
 
-12. **Подключение к redis и создание кластера**:
-   
-   ```bash
-   docker exec -it redis_1 
-   echo "yes" | redis-cli --cluster create   173.17.0.2:6379   173.17.0.3:6379   173.17.0.4:6379   173.17.0.5:6379   173.17.0.6:6379   173.17.0.7:6379   --cluster-replicas 1
+13. **Открыть в браузере**:
+
+http://localhost:8080/helloDoc/users
